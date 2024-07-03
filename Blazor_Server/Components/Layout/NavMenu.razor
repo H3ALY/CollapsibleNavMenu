@@ -1,29 +1,184 @@
-﻿<div class="top-row ps-3 navbar navbar-dark">
+﻿@inject IJSRuntime JSRuntime
+
+<div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
-        <a class="navbar-brand" href="">Blazor_Server</a>
+        @if (!IconMenuActive)
+        {
+            <a class="navbar-brand" href="">Blazor Server</a>
+        }
+        <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
+            <span class="navbar-toggler-icon"></span>
+        </button>
     </div>
 </div>
 
-<input type="checkbox" title="Navigation menu" class="navbar-toggler" />
-
-<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
+<div class="@NavMenuCssClass">
     <nav class="flex-column">
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
+                <span class="bi bi-house" aria-hidden="true"></span>
+                @if (!IconMenuActive)
+                {
+                    <span><label>Home</label></span>
+                }
             </NavLink>
         </div>
-
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="counter">
-                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Counter
+                <span class="bi bi-plus-circle" aria-hidden="true"></span>
+                @if (!IconMenuActive)
+                {
+                    <span><label>Counter</label></span>
+                }
             </NavLink>
         </div>
-
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="weather">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Weather
+                <span class="bi bi-brightness-high" aria-hidden="true"></span>
+                @if (!IconMenuActive)
+                {
+                    <span><label>Fetch data</label></span>
+                }
             </NavLink>
+        </div>
+        <div class="nav-item px-3" @onclick='@(() => ToggleSubMenu("subMenu1"))'>
+            <NavLink class="nav-link flex-container" Match="NavLinkMatch.All">
+                <span class="bi bi-folder" aria-hidden="true" title="subMenu"></span>
+                @if (!IconMenuActive)
+                {
+                    <span><label>Sub Menu 1</label></span>
+                    <span class="oi chevron-icon @(IsSubMenuOpen("subMenu1") ? "bi bi-arrow-up-short" : "bi bi-arrow-down-short")" aria-hidden="true"></span>
+                }
+            </NavLink>
+            <div class="sub-menu" style="display: @(IsSubMenuOpen("subMenu1") ? "block" : "none")">
+                <NavLink class="nav-link" href="subitem1">
+                    <span class="bi bi-arrow-right-circle" aria-hidden="true" title="Sub Item 1"></span>
+                    @if (!IconMenuActive)
+                    {
+                        <span><label>Sub Menu 1 Item 1</label></span>
+                    }
+                </NavLink>
+                <NavLink class="nav-link" href="subitem2">
+                    <span class="bi bi-arrow-right-circle" aria-hidden="true" title="Sub Item 2"></span>
+                    @if (!IconMenuActive)
+                    {
+                        <span><label>Sub Menu 1 Item 2</label></span>
+                    }
+                </NavLink>
+            </div>
+        </div>
+        <div class="nav-item px-3" @onclick='@(() => ToggleSubMenu("subMenu2"))'>
+            <NavLink class="nav-link flex-container" Match="NavLinkMatch.All">
+                <span class="bi bi-folder" aria-hidden="true" title="subMenu"></span>
+                @if (!IconMenuActive)
+                {
+                    <span><label>Sub Menu 2</label></span>
+                    <span class="oi chevron-icon @(IsSubMenuOpen("subMenu2") ? "bi bi-arrow-up-short" : "bi bi-arrow-down-short")" aria-hidden="true"></span>
+                }
+            </NavLink>
+            <div class="sub-menu" style="display: @(IsSubMenuOpen("subMenu2") ? "block" : "none")">
+                <NavLink class="nav-link" href="subitem1">
+                    <span class="bi bi-arrow-right-circle" aria-hidden="true" title="Sub Item 1"></span>
+                    @if (!IconMenuActive)
+                    {
+                        <span><label>Sub Menu 2 Item 1</label></span>
+                    }
+                </NavLink>
+                <NavLink class="nav-link" href="subitem2">
+                    <span class="bi bi-arrow-right-circle" aria-hidden="true" title="Sub Item 2"></span>
+                    @if (!IconMenuActive)
+                    {
+                        <span><label>Sub Menu 2 Item 2</label></span>
+                    }
+                </NavLink>
+            </div>
         </div>
     </nav>
 </div>
+
+<div class="bottom-row">
+    <div class="icon-menu-arrow">
+        @if (!IconMenuActive)
+        {
+            <span class="bi bi-arrow-bar-left" style="color: white;" @onclick="ToggleIconMenu"></span>
+        }
+        else
+        {
+            <span class="bi bi-arrow-bar-right" style="color: white;" @onclick="ToggleIconMenu"></span>
+        }
+    </div>
+</div>
+
+@code
+{
+    [Parameter]
+    public EventCallback<bool> ShowIconMenu { get; set; }
+
+    private bool IconMenuActive { get; set; } = false;
+    private bool collapseNavMenu = true;
+    private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+    private Dictionary<string, bool> subMenuStates = new Dictionary<string, bool>();
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JSRuntime.InvokeVoidAsync("setResizeCallback", DotNetObjectReference.Create(this));
+        }
+    }
+
+    [JSInvokable]
+    public async Task OnResize(bool isBelowThreshold)
+    {
+        if (isBelowThreshold && IconMenuActive)
+        {
+            collapseNavMenu = true;
+            await ToggleIconMenu();
+
+            await ShowIconMenu.InvokeAsync(IconMenuActive);
+
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private void ToggleNavMenu()
+    {
+        collapseNavMenu = !collapseNavMenu;
+    }
+
+    private async Task ToggleIconMenu()
+    {
+        IconMenuActive = !IconMenuActive;
+
+        await ShowIconMenu.InvokeAsync(IconMenuActive);
+    }
+
+    private void ToggleSubMenu(string subMenuKey)
+    {
+        if (subMenuStates.ContainsKey(subMenuKey) && subMenuStates[subMenuKey])
+        {
+            subMenuStates[subMenuKey] = false;
+        }
+        else
+        {
+            foreach (var key in subMenuStates.Keys.ToList())
+            {
+                subMenuStates[key] = false;
+            }
+
+            if (subMenuStates.ContainsKey(subMenuKey))
+            {
+                subMenuStates[subMenuKey] = !subMenuStates[subMenuKey];
+            }
+            else
+            {
+                subMenuStates[subMenuKey] = true;
+            }
+        }
+    }
+
+    private bool IsSubMenuOpen(string subMenuKey)
+    {
+        return subMenuStates.ContainsKey(subMenuKey) && subMenuStates[subMenuKey];
+    }
+}

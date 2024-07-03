@@ -8,12 +8,24 @@
     <link rel="stylesheet" href="bootstrap/bootstrap.min.css" />
     <link rel="stylesheet" href="app.css" />
     <link rel="stylesheet" href="Blazor_Server.styles.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
     <link rel="icon" type="image/png" href="favicon.png" />
     <HeadOutlet @rendermode="InteractiveServer" />
 </head>
 
 <body>
     <Routes @rendermode="InteractiveServer" />
+    <script>
+        window.setResizeCallback = (dotNetHelper) => {
+            const resizeCallback = () => {
+                const isBelowThreshold = window.innerWidth < 642;
+                dotNetHelper.invokeMethodAsync('OnResize', isBelowThreshold);
+            };
+
+            window.addEventListener('resize', resizeCallback);
+            resizeCallback();
+        };
+    </script>
     <script src="_framework/blazor.web.js"></script>
 </body>
 
