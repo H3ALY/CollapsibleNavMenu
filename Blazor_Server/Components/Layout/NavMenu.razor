@@ -6,6 +6,10 @@
         {
             <a class="navbar-brand" href="">Blazor Server</a>
         }
+        else
+        {
+            <a class="navbar-brand bi bi-window-fullscreen" />
+        }
         <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
             <span class="navbar-toggler-icon"></span>
         </button>
@@ -47,7 +51,7 @@
                 @if (!IconMenuActive)
                 {
                     <span><label>Sub Menu 1</label></span>
-                    <span class="oi chevron-icon @(IsSubMenuOpen("subMenu1") ? "bi bi-arrow-up-short" : "bi bi-arrow-down-short")" aria-hidden="true"></span>
+                    <span class="bi bi-arrow-icon @(IsSubMenuOpen("subMenu1") ? "bi bi-arrow-up-short" : "bi bi-arrow-down-short")" aria-hidden="true"></span>
                 }
             </NavLink>
             <div class="sub-menu" style="display: @(IsSubMenuOpen("subMenu1") ? "block" : "none")">
@@ -73,7 +77,7 @@
                 @if (!IconMenuActive)
                 {
                     <span><label>Sub Menu 2</label></span>
-                    <span class="oi chevron-icon @(IsSubMenuOpen("subMenu2") ? "bi bi-arrow-up-short" : "bi bi-arrow-down-short")" aria-hidden="true"></span>
+                    <span class="bi bi-arrow-icon @(IsSubMenuOpen("subMenu2") ? "bi bi-arrow-up-short" : "bi bi-arrow-down-short")" aria-hidden="true"></span>
                 }
             </NavLink>
             <div class="sub-menu" style="display: @(IsSubMenuOpen("subMenu2") ? "block" : "none")">
